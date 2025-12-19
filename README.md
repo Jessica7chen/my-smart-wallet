@@ -26,7 +26,7 @@ Log: Enter the date, category, note, and amount, then click the green "Log" butt
 Edit: Click any blue amount in the record list to modify the entry.
 Add to Home Screen: For the best experience on mobile, select "Add to Home Screen" in your mobile browser to use it like a native app.
 
-------------------------------------------------------------CHINESE VERSION---------------------------------------------------------------------
+------------------------------------------------------------CHINESE VERSION---------------------------------
 💰 账本好朋友 | Wallet Buddy Pro
 一款支持中、英、韩三语，CNY/USD/KRW 三币种一键转换的极简私密记账工具。
 
