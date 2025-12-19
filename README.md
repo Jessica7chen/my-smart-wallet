@@ -1,36 +1,31 @@
- # 💰 My Smart Wallet | 极简双币记账助手
-一款支持人民币/美金双币种一键转换、自动生成日周月统计及趋势柱状图的极简私密记账工具。纯本地存储，保护财务隐私。
-A minimalist private bookkeeping tool supporting one-click CNY/USD conversion, daily/weekly/monthly stats, and trend charts. Local-only storage for maximum financial privacy.
+💰 账本好朋友 | Wallet Buddy Pro
+一款支持中、英、韩三语，CNY/USD/KRW 三币种一键转换的极简私密记账工具。
 
+[Simplified Chinese] | [English] | [Korean]
 
-## 🇨🇳 中文说明 (Simplified Chinese)
-一款专为个人财务管理设计的极简网页记账工具，特别适合有跨国消费需求、重视数据隐私的用户。
+✨ 核心功能 (Core Features)
+极简大气 UI：采用现代无衬线字体，配合莫兰迪低饱和度品牌绿（Emerald 500），打造高级、纯净、无干扰的记账体验。
+三语一键切换：支持 中文 (CN)、英文 (EN)、韩文 (KR) 界面，点击瞬间完成全量语言同步。
+多币种智能换算：支持 人民币 (CNY)、美金 (USD)、韩币 (KRW) 循环切换。系统根据内置汇率自动重算所有统计数据。
+自定义分类记忆：不设限的分类系统。输入过的任何分类名（如“猫粮”、“种子”）都会被系统记住，并在下次记录时自动提示。
+自定义区间统计：选择任意“开始日期”与“结束日期”，即时汇总该时间段内的总消耗，非常适合单次旅行或项目预算核算。
+消费生长趋势：内置动态柱状图，直观展现每月消费金额的累积与波动趋势。
+搜索与快速修改：支持全局搜索备注与分类；点击流水列表中对应的 蓝色金额数字 即可直接修改内容。
+深色模式 (Dark Mode)：内置 🌙/☀️ 一键切换，适配夜间记账场景，视觉更柔和。
 
-### ✨ 核心功能
-- **双币种实时切换**：支持 CNY/USD 一键汇率转换，所有统计数据实时重算。
-- **多维度自动统计**：自动汇总 **今日、本周、本月** 消费，并生成 **历史月度报表**。
-- **消费走势图**：内置动态柱状图，直观展现每月消费金额的累积与波动。
-- **数据隐私与安全**：数据仅存储在本地浏览器（LocalStorage），不上传任何服务器。
-- **灵活备份**：支持一键导出/导入 JSON 备份文件，防止数据意外丢失。
+🔒 隐私与存储说明 (Privacy & Storage)
+您的财务数据完全属于您自己。纯本地存储 (LocalStorage)：所有记账数据均存储在 您当前使用的设备浏览器中。
+GitHub 仅负责托管网页界面代码，不会读取、上传或在服务器上保存您的任何账单信息。
 
-### 🚀 如何使用
-1. **在线访问**：点击你的 GitHub Pages 链接。
-2. **记录账单**：输入日期、备注及金额，点击“记录”。
-3. **定期备份**：建议每周导出一次 JSON 文件进行本地备份。
+安全性：
+数据仅在本地生效，即使他人访问同样的网址，也只能看到他们自己设备上的记录。
 
----
+备份机制：
+建议定期使用顶部的 “备份 (Export JSON)” 功能。
+更换设备或浏览器前，请先导出备份文件，再在新设备上使用 “导入” 功能进行还原。
 
-## 🇺🇸 English Description
-A minimalist web-based accounting tool designed for individual financial tracking, perfect for users with cross-border spending and high privacy standards.
-
-### ✨ Key Features
-- **Dual Currency Switch**: One-click conversion between CNY/USD with instant recalculation of all stats.
-- **Automated Statistics**: Real-time summaries for **Today, This Week, and This Month**, plus a **Historical Monthly Report**.
-- **Visual Trends**: Dynamic bar charts showing the accumulation and fluctuation of monthly expenses.
-- **Privacy & Security**: All data is stored locally in your browser (LocalStorage); no data is ever uploaded to a server.
-- **Flexible Backup**: One-click Export/Import of JSON backup files to ensure data persistence.
-
-### 🚀 How to Use
-1. **Access Online**: Open your GitHub Pages URL.
-2. **Log Expense**: Enter the date, description, and amount, then click "Log".
-3. **Regular Backup**: It is recommended to export a JSON file weekly for local backup.
+🚀 如何使用 (Quick Start)
+访问地址：在浏览器打开您部署好的 GitHub Pages 链接。
+记录：输入日期、分类、备注和金额，点击“记一笔”。
+修改：点击流水列表中的 蓝色数字 即可修改金额。
+添加到主屏幕：建议在手机浏览器中选择“添加到主屏幕”，即可像原生 App 一样快速启动。
