@@ -1,7 +1,34 @@
+💰 Wallet Buddy Pro | Minimalist Private Bookkeeping
+A minimalist, private bookkeeping tool supporting Simplified Chinese, English, and Korean, with one-click currency conversion between CNY, USD, and KRW.
+
+✨ Core Features
+Modern Minimalist UI: Designed with a clean, professional aesthetic using the Morandi color palette (Emerald 500) and high-quality system typography for a distraction-free experience.
+Trilingual Support: Full UI localization for Simplified Chinese (CN), English (EN), and Korean (KR). Switch instantly with a single click.
+Multi-Currency Engine: Seamlessly cycle between CNY, USD, and KRW. The system automatically recalculates all statistics based on built-in exchange rates.
+Custom Category Memory: A flexible, "no-limit" categorization system. The tool remembers any custom category names you enter (e.g., "Cat Food," "Seeds") and provides them as suggestions for future entries.
+Smart Range Statistics: Select any "Start Date" and "End Date" to instantly calculate total spending for that specific period—perfect for tracking travel expenses or project budgets.
+Growth Trend Analysis: Features dynamic bar charts that provide a visual overview of monthly spending accumulation and historical trends.
+Quick Search & Edit: Effortlessly search through notes or categories; simply click on a blue amount figure in the record list to edit the entry directly.
+Dark Mode: Includes a built-in 🌙/☀️ toggle to ensure a comfortable experience during night-time use.
+
+🔒 Privacy & Data Storage
+Your financial data belongs to you—and only you. Pure Local Storage (LocalStorage): All your bookkeeping data is stored exclusively within your current device's browser. GitHub only hosts the web interface code; it does not upload, read, or store any of your transaction information on its servers.
+
+Security:
+Data is device-specific. Even if others access the same URL, they will only see the records stored on their own devices.
+
+Backup Mechanism:
+It is highly recommended to use the "Export JSON" feature at the top of the page regularly. Before switching devices or browsers, export your backup file and use the "Import" function on the new device to restore your records.
+
+🚀 Quick Start
+Access: Open your deployed GitHub Pages URL in any browser.
+Log: Enter the date, category, note, and amount, then click the green "Log" button.
+Edit: Click any blue amount in the record list to modify the entry.
+Add to Home Screen: For the best experience on mobile, select "Add to Home Screen" in your mobile browser to use it like a native app.
+
+------------------------------------------------------------CHINESE VERSION---------------------------------------------------------------------
 💰 账本好朋友 | Wallet Buddy Pro
 一款支持中、英、韩三语，CNY/USD/KRW 三币种一键转换的极简私密记账工具。
-
-[Simplified Chinese] | [English] | [Korean]
 
 ✨ 核心功能 (Core Features)
 极简大气 UI：采用现代无衬线字体，配合莫兰迪低饱和度品牌绿（Emerald 500），打造高级、纯净、无干扰的记账体验。
