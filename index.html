@@ -3,247 +3,393 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>账本好朋友 - Wallet Buddy Pro</title>
+    <title>虎爪记账 - Tiger Paw Account</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
-        /* 强制使用简约大气的系统字体 */
-        body { 
-            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-            -webkit-font-smoothing: antialiased;
-            letter-spacing: -0.01em;
-            background-color: #F8FAFC;
-        }
-        
-        /* 统一品牌色：高级绿 */
-        :root { --brand-green: #10B981; --brand-blue: #4F46E5; }
-
-        .card-elegant { 
-            background: white; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card-elegant:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
-
-        /* 隐藏滚动条但保留功能 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
+        body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background-color: #F8FAFC; }
+        .card-elegant { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s ease; }
         .dark { background-color: #0F172A; color: #F1F5F9; }
-        .dark .card-elegant { background-color: #1E293B; box-shadow: none; border: 1px solid #334155; }
-        .dark input, .dark select { background-color: #334155; border-color: #475569; color: white; }
+        .dark .card-elegant { background-color: #1E293B; border: 1px solid #334155; }
+        .dark input, .dark textarea, .dark select { background-color: #334155; border-color: #475569; color: white; }
+        
+        .excel-row { 
+            display: grid; 
+            grid-template-columns: 40px 80px 70px 80px 1fr 100px 40px; 
+            align-items: stretch;
+            font-size: 12px; 
+            border-bottom: 1px solid #e2e8f0;
+            height: 32px; 
+        }
+        .dark .excel-row { border-bottom-color: #334155; }
+        .excel-row:hover { background-color: #f1f5f9; }
+        .dark .excel-row:hover { background-color: #1e293b; }
+        
+        .excel-cell {
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            border-left: 1px solid #f1f5f9;
+            cursor: pointer;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .dark .excel-cell { border-left-color: #334155; }
+        .excel-cell:first-child { border-left: none; }
+
+        .month-header {
+            background-color: #f1f5f9;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+        .dark .month-header { background-color: #334155; color: #94a3b8; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        #batchBar { transition: transform 0.3s ease-in-out; transform: translateY(100%); z-index: 100; }
+        #batchBar.active { transform: translateY(0); }
     </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen transition-colors duration-300" id="bodyTag">
-    <div class="max-w-6xl mx-auto space-y-8">
-        
-        <div class="card-elegant p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+<body class="p-4 md:p-6 min-h-screen transition-colors duration-300 pb-24">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <div class="card-elegant p-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-6">
-                <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight i18n" data-key="brandName">账本好朋友</h1>
-                <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-                    <button onclick="setLang('cn')" class="lang-btn px-3 py-1 text-[11px] font-medium rounded-md transition-all" id="btn-cn">CN</button>
-                    <button onclick="setLang('en')" class="lang-btn px-3 py-1 text-[11px] font-medium rounded-md transition-all" id="btn-en">EN</button>
-                    <button onclick="setLang('kr')" class="lang-btn px-3 py-1 text-[11px] font-medium rounded-md transition-all" id="btn-kr">KR</button>
+                <h1 class="text-lg font-bold i18n text-slate-800 dark:text-white" data-key="brandName">账本好朋友</h1>
+                <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                    <button onclick="setLang('cn')" class="lang-btn px-3 py-1 text-[10px] rounded-md" id="btn-cn">CN</button>
+                    <button onclick="setLang('en')" class="lang-btn px-3 py-1 text-[10px] rounded-md" id="btn-en">EN</button>
+                    <button onclick="setLang('kr')" class="lang-btn px-3 py-1 text-[10px] rounded-md" id="btn-kr">KR</button>
                 </div>
             </div>
-            
             <div class="flex items-center gap-3">
-                <button onclick="toggleDark()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" id="darkBtn">🌙</button>
-                <div class="h-6 w-[1px] bg-slate-200 mx-1"></div>
-                <button onclick="rotateCurrency()" id="currencyBtn" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all w-24">CNY</button>
+                <div id="rateInfo" class="text-[10px] text-slate-400 mr-2">汇率同步中...</div>
+                <button onclick="toggleDark()" class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" id="darkBtn">🌙</button>
+                <button onclick="rotateCurrency()" id="currencyBtn" class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold w-20">CNY</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="card-elegant p-6 border-l-4 border-indigo-500">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 i18n" data-key="statDayTitle">今日消耗</p>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white" id="statDay">¥0.00</p>
+        <div class="card-elegant p-4">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
+                <input type="date" id="iptDate" class="p-1.5 border rounded-lg text-xs outline-none">
+                <input list="catHistory" id="iptCat" class="p-1.5 border rounded-lg text-xs outline-none i18n-ph" data-key="phCat">
+                <input list="cityHistory" id="iptCity" class="p-1.5 border rounded-lg text-xs outline-none i18n-ph" data-key="phCity">
+                <input type="text" id="iptDesc" class="p-1.5 border rounded-lg text-xs outline-none i18n-ph" data-key="phDesc">
+                <input type="number" id="iptAmt" class="p-1.5 border rounded-lg text-xs outline-none i18n-ph" data-key="phAmt">
+                <button onclick="addRecord()" id="btnAdd" class="bg-emerald-500 text-white rounded-lg font-bold text-xs i18n active:scale-95 transition-all" data-key="btnRecord">记一笔</button>
             </div>
-            <div class="card-elegant p-6 border-l-4 border-emerald-500">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 i18n" data-key="statWeekTitle">本周消耗</p>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white" id="statWeek">¥0.00</p>
+            <datalist id="catHistory"></datalist><datalist id="cityHistory"></datalist>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="card-elegant p-4 border-l-4 border-indigo-500">
+                <p class="text-[10px] text-slate-400 uppercase i18n font-semibold" data-key="statDayTitle">今日统计</p>
+                <p class="text-xl font-bold text-slate-800 dark:text-white" id="statDay">¥0.00</p>
             </div>
-            <div class="card-elegant p-6 border-l-4 border-slate-800">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 i18n" data-key="statMonthTitle">本月消耗</p>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white" id="statMonth">¥0.00</p>
+            <div class="card-elegant p-4 border-l-4 border-emerald-500">
+                <p class="text-[10px] text-slate-400 uppercase i18n font-semibold" data-key="statWeekTitle">本周统计</p>
+                <p class="text-xl font-bold text-slate-800 dark:text-white" id="statWeek">¥0.00</p>
+            </div>
+            <div class="card-elegant p-4 border-l-4 border-slate-800">
+                <p class="text-[10px] text-slate-400 uppercase i18n font-semibold" data-key="statMonthTitle">本月统计</p>
+                <p class="text-xl font-bold text-slate-800 dark:text-white" id="statMonth">¥0.00</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <div class="card-elegant p-6">
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <input type="date" id="iptDate" class="p-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 ring-emerald-500/20 transition-all">
-                        <div class="relative">
-                            <input list="catHistory" id="iptCat" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none i18n-ph" data-key="phCat">
-                            <datalist id="catHistory"></datalist>
-                        </div>
-                        <input type="text" id="iptDesc" class="p-2.5 border border-slate-200 rounded-xl text-sm outline-none i18n-ph" data-key="phDesc">
-                        <input type="number" id="iptAmt" class="p-2.5 border border-slate-200 rounded-xl text-sm outline-none i18n-ph" data-key="phAmt">
-                        <button onclick="addRecord()" class="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm transition-all i18n shadow-sm active:scale-95" data-key="btnRecord">记一笔</button>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="card-elegant p-4 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="searchBar" oninput="debounceSearch()" class="px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-xs w-48 outline-none i18n-ph" data-key="phSearch">
+                        <select id="filterCity" onchange="render()" class="p-1.5 border rounded-lg text-xs outline-none bg-white dark:bg-slate-800">
+                            <option value="">全部城市</option>
+                        </select>
                     </div>
-                </div>
-
-                <div class="card-elegant p-6 bg-slate-50 dark:bg-slate-800/50 border-none">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center shadow-sm">📅</div>
-                            <div>
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest i18n" data-key="rangeTitle">自定义区间统计</p>
-                                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="rangeResult">¥0.00</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 bg-white dark:bg-slate-700 p-2 rounded-xl border border-slate-100 dark:border-slate-600">
-                            <input type="date" id="rangeStart" onchange="render()" class="bg-transparent border-none text-xs outline-none">
-                            <span class="text-slate-300">至</span>
-                            <input type="date" id="rangeEnd" onchange="render()" class="bg-transparent border-none text-xs outline-none">
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="rangeStart" onchange="render()" class="p-1 border rounded-lg text-[10px] outline-none">
+                        <span class="text-slate-300 text-xs">-</span>
+                        <input type="date" id="rangeEnd" onchange="render()" class="p-1 border rounded-lg text-[10px] outline-none">
+                        <p class="text-xs font-bold text-indigo-600 ml-2" id="rangeResult">¥0.00</p>
                     </div>
                 </div>
 
                 <div class="card-elegant overflow-hidden">
-                    <div class="p-5 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest i18n" data-key="listTitle">流水记录</span>
-                        <input type="text" id="searchBar" oninput="render()" class="px-4 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-xs w-48 outline-none i18n-ph" data-key="phSearch">
+                    <div class="month-header !cursor-default !bg-slate-200/50 dark:!bg-slate-800">
+                        <div class="excel-row w-full font-bold !border-none !h-8 text-slate-500">
+                            <span class="excel-cell justify-center">选</span>
+                            <span class="excel-cell">日期</span>
+                            <span class="excel-cell">分类</span>
+                            <span class="excel-cell">城市</span>
+                            <span class="excel-cell">备注</span>
+                            <span class="excel-cell justify-end">金额</span>
+                            <span class="excel-cell justify-center"></span>
+                        </div>
                     </div>
-                    <div id="recordList" class="divide-y divide-slate-50 dark:divide-slate-800 max-h-[600px] overflow-y-auto no-scrollbar"></div>
+                    <div id="recordList" class="max-h-[600px] overflow-y-auto overflow-x-auto"></div>
                 </div>
             </div>
 
-            <div class="space-y-8">
-                <div class="card-elegant p-6">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-6 text-center i18n" data-key="chartTitle">月度累计对比</p>
-                    <div class="h-64"><canvas id="barChart"></canvas></div>
-                </div>
-                
+            <div class="space-y-6">
+                <div class="card-elegant p-4 h-48"><canvas id="barChart"></canvas></div>
                 <div class="card-elegant p-4">
-                    <div class="flex gap-3">
-                        <button onclick="exportData()" class="flex-1 py-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 transition i18n" data-key="backup">备份 JSON</button>
-                        <button onclick="document.getElementById('importFile').click()" class="flex-1 py-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 transition i18n" data-key="import">还原数据</button>
-                    </div>
+                    <textarea id="memoArea" oninput="saveMemo()" class="w-full h-32 p-2 text-xs bg-slate-50 dark:bg-slate-800/50 rounded-lg border-none focus:ring-1 focus:ring-indigo-500 outline-none resize-none i18n-ph" data-key="phMemo"></textarea>
                 </div>
-
-                <div id="historyMonths" class="card-elegant divide-y divide-slate-50 dark:divide-slate-800 overflow-hidden"></div>
+                <div class="card-elegant p-3 flex gap-2">
+                    <button onclick="exportData()" class="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-[10px] font-bold i18n" data-key="backup">备份</button>
+                    <button onclick="document.getElementById('importFile').click()" class="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-[10px] font-bold i18n" data-key="import">导入</button>
+                </div>
+                <div class="card-elegant p-4">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-4 text-center i18n" data-key="catAnalysisTitle">区间分类占比分析</p>
+                    <div id="pieStatus" class="text-[10px] text-slate-300 text-center py-10 i18n" data-key="pieWait">请在上方选择日期区间以查看分析</div>
+                    <div id="pieContainer" class="h-64 hidden"><canvas id="pieChart"></canvas></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <div id="batchBar" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t p-3 flex justify-between items-center shadow-xl">
+        <div class="flex items-center gap-4 ml-4">
+            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 rounded">
+            <span class="text-xs font-medium"><span id="selectedCount">0</span> 已选</span>
+        </div>
+        <div class="flex gap-2 mr-4">
+            <button onclick="toggleBatchMode()" class="px-4 py-1.5 text-xs text-slate-500 i18n" data-key="cancel">取消</button>
+            <button onclick="batchDelete()" class="px-6 py-1.5 text-xs bg-red-500 text-white rounded-lg font-bold">删除选中</button>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+
     <script>
+        // 注册插件以在饼图上显示百分比
+        Chart.register(ChartDataLabels);
+
         const i18nDict = {
-            cn: { brandName: "账本好朋友", backup: "备份", import: "导入", statDayTitle: "今日消耗", statWeekTitle: "本周消耗", statMonthTitle: "本月消耗", rangeTitle: "选中区间总计", phCat: "分类 (如: 餐饮)", phDesc: "项目备注", phAmt: "金额", btnRecord: "记一笔", listTitle: "详细流水", chartTitle: "月度消费趋势", phSearch: "🔍 搜索...", del: "删除", confDel: "确定删除？", editPrompt: "修改金额", importConf: "合并现有数据？" },
-            en: { brandName: "Wallet Buddy", backup: "Export", import: "Import", statDayTitle: "Today", statWeekTitle: "Weekly", statMonthTitle: "Monthly", rangeTitle: "Range Total", phCat: "Category", phDesc: "Note", phAmt: "Amount", btnRecord: "Log", listTitle: "Records", chartTitle: "Monthly Trends", phSearch: "🔍 Search...", del: "Del", confDel: "Delete?", editPrompt: "Edit", importConf: "Merge data?" },
-            kr: { brandName: "가계부 친구", backup: "백업", import: "가져오기", statDayTitle: "오늘", statWeekTitle: "이번 주", statMonthTitle: "이번 달", rangeTitle: "기간 합계", phCat: "분류", phDesc: "항목", phAmt: "금액", btnRecord: "기록", listTitle: "내역", chartTitle: "월간 추세", phSearch: "🔍 검색...", del: "삭제", confDel: "삭제할까요?", editPrompt: "금액 수정", importConf: "데이터 합치기?" }
+            cn: { brandName: "虎爪记账", backup: "备份", import: "导入", statDayTitle: "今日统计", statWeekTitle: "本周统计", statMonthTitle: "本月统计", rangeTitle: "合计", phCat: "分类", phCity: "城市", phDesc: "备注", phAmt: "金额", btnRecord: "记一笔", phSearch: "🔍 搜索...", phMemo: "财务备忘录...", batchEdit: "管理", cancel: "取消", allCities: "全部城市", editPrompt: "修改", catAnalysisTitle: "区间分类占比", pieWait: "请选好开始和结束日期" },
+            en: { brandName: "Tiger Paw Account", backup: "Export", import: "Import", statDayTitle: "Today", statWeekTitle: "This Week", statMonthTitle: "This Month", rangeTitle: "Total", phCat: "Cat", phCity: "City", phDesc: "Note", phAmt: "Amt", btnRecord: "Log", phSearch: "🔍 Search...", phMemo: "Memo...", batchEdit: "Edit", cancel: "Cancel", allCities: "All", editPrompt: "Edit", catAnalysisTitle: "Category Breakdown", pieWait: "Please select a date range" },
+            kr: { brandName: "타이거 포 가계부", backup: "백업", import: "가져오기", statDayTitle: "오늘", statWeekTitle: "이번 주", statMonthTitle: "이번 달", rangeTitle: "합계", phCat: "분류", phCity: "도시", phDesc: "항목", phAmt: "금额", btnRecord: "기록", phSearch: "🔍 검색...", phMemo: "메모...", batchEdit: "관리", cancel: "취소", allCities: "전체", editPrompt: "修改", catAnalysisTitle: "카테고리 분석", pieWait: "날짜 범위를 선택하십시오" }
         };
 
-        let currentLang = localStorage.getItem('acc_lang') || 'cn';
         let expenses = JSON.parse(localStorage.getItem('acc_data_v3') || '[]');
+        let currentLang = localStorage.getItem('acc_lang') || 'cn';
         let isDark = localStorage.getItem('acc_dark') === 'true';
-        let curMode = 'CNY';
+        let curMode = 'CNY', rates = { USD: 7.02, KRW: 0.0053 };
         const SYMBOLS = { CNY: '¥', USD: '$', KRW: '₩' };
-        let chartInstance = null;
-
-        function toggleDark() { isDark = !isDark; localStorage.setItem('acc_dark', isDark); applyTheme(); }
-        
-        function applyTheme() {
-            document.body.classList.toggle('dark', isDark);
-            document.getElementById('darkBtn').innerText = isDark ? "☀️" : "🌙";
-            render();
-        }
-
-        function setLang(l) { currentLang = l; localStorage.setItem('acc_lang', l); updateUI(); }
-        
-        function updateUI() {
-            document.querySelectorAll('.i18n').forEach(el => el.innerText = i18nDict[currentLang][el.getAttribute('data-key')]);
-            document.querySelectorAll('.i18n-ph').forEach(el => el.placeholder = i18nDict[currentLang][el.getAttribute('data-key')]);
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                const isActive = btn.id === 'btn-' + currentLang;
-                btn.className = `lang-btn px-3 py-1 text-[11px] font-medium rounded-md transition-all ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`;
-            });
-            render();
-        }
-
-        function rotateCurrency() {
-            const seq = ['CNY', 'USD', 'KRW'];
-            curMode = seq[(seq.indexOf(curMode) + 1) % 3];
-            document.getElementById('currencyBtn').innerText = curMode;
-            render();
-        }
-
-        function toBase(v) { return curMode==='CNY'?v : (curMode==='USD'?v*7.25 : (v/1350)*7.25); }
-        function fromBase(v) { return curMode==='CNY'?v : (curMode==='USD'?v/7.25 : (v/7.25)*1350); }
-
-        function addRecord() {
-            const d = document.getElementById('iptDate').value, c = document.getElementById('iptCat').value.trim(), t = document.getElementById('iptDesc').value, a = parseFloat(document.getElementById('iptAmt').value);
-            if(!d || isNaN(a)) return;
-            expenses.push({ id: Date.now(), date: d, cat: c || 'Other', desc: t || '-', amt: toBase(a) });
-            localStorage.setItem('acc_data_v3', JSON.stringify(expenses));
-            document.getElementById('iptCat').value = ''; document.getElementById('iptDesc').value = ''; document.getElementById('iptAmt').value = '';
-            render();
-        }
-
-        function deleteItem(id) { if(confirm(i18nDict[currentLang].confDel)) { expenses = expenses.filter(e => e.id !== id); localStorage.setItem('acc_data_v3', JSON.stringify(expenses)); render(); } }
-        
-        function editItem(id) {
-            const item = expenses.find(e => e.id === id);
-            const newVal = prompt(i18nDict[currentLang].editPrompt, fromBase(item.amt).toFixed(curMode==='KRW'?0:2));
-            if (newVal !== null) { item.amt = toBase(parseFloat(newVal)); localStorage.setItem('acc_data_v3', JSON.stringify(expenses)); render(); }
-        }
+        let barChart = null, pieChart = null, isBatchMode = false;
+        let searchTimeout = null, expandedMonths = new Set();
 
         function render() {
-            const list = document.getElementById('recordList'), hList = document.getElementById('historyMonths'), datalist = document.getElementById('catHistory'), q = document.getElementById('searchBar').value.toLowerCase();
-            list.innerHTML = ''; hList.innerHTML = ''; datalist.innerHTML = '';
-            const sym = SYMBOLS[curMode], fmt = (v) => sym + fromBase(v).toLocaleString(undefined, {minimumFractionDigits: curMode==='KRW'?0:2});
+            const list = document.getElementById('recordList');
+            const q = document.getElementById('searchBar').value.toLowerCase();
+            const selectedCity = document.getElementById('filterCity').value;
+            const rs = document.getElementById('rangeStart').value;
+            const re = document.getElementById('rangeEnd').value;
             
-            const now = new Date(), today = now.toISOString().split('T')[0], rs = document.getElementById('rangeStart').value, re = document.getElementById('rangeEnd').value;
-            let dS = 0, wS = 0, mS = 0, rS = 0, mG = {}, catsSet = new Set();
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentMonthStr = todayStr.substring(0, 7);
+            
+            const dayOfWeek = now.getDay() || 7;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - dayOfWeek + 1);
+            const mondayStr = monday.toISOString().split('T')[0];
 
-            expenses.sort((a,b) => b.date.localeCompare(a.date)).forEach(item => {
-                const mon = item.date.substring(0, 7), isMatch = item.desc.toLowerCase().includes(q) || item.cat.toLowerCase().includes(q);
-                if(item.date === today) dS += item.amt;
-                if(mon === today.substring(0, 7)) mS += item.amt;
-                if(rs && re && item.date >= rs && item.date <= re) rS += item.amt;
-                mG[mon] = (mG[mon] || 0) + item.amt;
+            let dS=0, wS=0, mS=0, rS=0, mG={}, catsSet=new Set(), citySet=new Set(), rangeCats={};
+            const monthsData = {};
+
+            expenses.forEach(item => {
+                const mon = item.date.substring(0,7);
+                if(item.city) citySet.add(item.city);
                 if(item.cat) catsSet.add(item.cat);
+                if(item.date === todayStr) dS += item.amt;
+                if(item.date >= mondayStr && item.date <= todayStr) wS += item.amt;
+                if(mon === currentMonthStr) mS += item.amt;
 
-                if(isMatch) {
-                    list.innerHTML += `<div class="p-4 flex justify-between items-center hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <span class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold rounded-lg uppercase tracking-wider">${item.cat}</span>
-                            <div><p class="font-bold text-slate-700 dark:text-slate-200 text-sm">${item.desc}</p><p class="text-[10px] text-slate-400 font-medium mt-0.5">${item.date}</p></div>
-                        </div>
-                        <div class="flex items-center gap-5"><span onclick="editItem(${item.id})" class="font-bold text-slate-800 dark:text-white text-base cursor-pointer hover:text-indigo-600 transition-colors">${fmt(item.amt)}</span>
-                        <button onclick="deleteItem(${item.id})" class="text-slate-300 hover:text-red-400 transition-colors">✕</button></div>
-                    </div>`;
+                mG[mon] = (mG[mon] || 0) + item.amt;
+                const inRange = (!rs || item.date >= rs) && (!re || item.date <= re);
+                const cityMatch = !selectedCity || item.city === selectedCity;
+                const searchMatch = !q || item.desc.toLowerCase().includes(q) || item.cat.toLowerCase().includes(q) || item.city.toLowerCase().includes(q) || item.date.includes(q);
+                
+                if(inRange && cityMatch) {
+                    rS += item.amt;
+                    if(rs && re) rangeCats[item.cat] = (rangeCats[item.cat] || 0) + item.amt;
+                }
+                if(searchMatch && inRange && cityMatch) {
+                    if(!monthsData[mon]) monthsData[mon] = [];
+                    monthsData[mon].push(item);
                 }
             });
 
-            catsSet.forEach(c => datalist.innerHTML += `<option value="${c}">`);
-            Object.keys(mG).sort().reverse().forEach(m => hList.innerHTML += `<div class="p-3.5 flex justify-between text-xs font-medium"><span>${m}</span><span class="font-bold text-slate-700 dark:text-slate-200">${fmt(mG[m])}</span></div>`);
-            
-            document.getElementById('statDay').innerText = fmt(dS);
-            document.getElementById('statMonth').innerText = fmt(mS);
-            document.getElementById('rangeResult').innerText = fmt(rS);
-            updateChart(mG);
-        }
+            document.getElementById('statDay').innerText = formatDisplay(dS);
+            document.getElementById('statWeek').innerText = formatDisplay(wS);
+            document.getElementById('statMonth').innerText = formatDisplay(mS);
+            document.getElementById('rangeResult').innerText = formatDisplay(rS);
+            updateDatalists(citySet, catsSet);
+            updateCharts(mG, rangeCats, (rs && re));
 
-        function updateChart(g) {
-            const ctx = document.getElementById('barChart').getContext('2d'), keys = Object.keys(g).sort(), data = keys.map(k => fromBase(g[k]));
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'bar', data: { labels: keys, datasets: [{ data: data, backgroundColor: '#4F46E5', borderRadius: 8, barThickness: 24 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, 
-                scales: { 
-                    y: { grid: { color: isDark?'#334155':'#F1F5F9' }, ticks: { font: { size: 9 } } }, 
-                    x: { grid: { display: false }, ticks: { font: { size: 9 } } } 
-                } }
+            list.innerHTML = '';
+            const sortedMonths = Object.keys(monthsData).sort().reverse();
+            sortedMonths.forEach(mon => {
+                const isExpanded = q || rs || re || selectedCity || expandedMonths.has(mon);
+                const monthTotal = monthsData[mon].reduce((sum, i) => sum + i.amt, 0);
+                const header = document.createElement('div');
+                header.className = 'month-header';
+                header.innerHTML = `<span>${mon} ${isExpanded ? '▼' : '▶'}</span><span>${formatDisplay(monthTotal)}</span>`;
+                header.onclick = () => {
+                    if(expandedMonths.has(mon)) expandedMonths.delete(mon);
+                    else expandedMonths.add(mon);
+                    render();
+                };
+                list.appendChild(header);
+
+                if(isExpanded) {
+                    const items = monthsData[mon].sort((a,b) => b.date.localeCompare(a.date));
+                    items.forEach(item => {
+                        const row = document.createElement('div');
+                        row.className = 'excel-row';
+                        const cColor = getCatColor(item.cat);
+                        row.innerHTML = `
+                            <div class="excel-cell justify-center">${isBatchMode ? `<input type="checkbox" class="item-checkbox w-3.5 h-3.5" value="${item.id}" onchange="updateCount()">` : '•'}</div>
+                            <div class="excel-cell text-slate-400 tabular-nums" onclick="quickEdit('${item.id}', 'date')">${item.date.substring(5)}</div>
+                            <div class="excel-cell" onclick="quickEdit('${item.id}', 'cat')"><span class="px-1 py-0.5 rounded-[4px] text-[9px] font-bold uppercase" style="background-color:${cColor}22; color:${cColor}">${item.cat}</span></div>
+                            <div class="excel-cell text-slate-400 truncate pr-2" onclick="quickEdit('${item.id}', 'city')">${item.city || ''}</div>
+                            <div class="excel-cell truncate font-medium text-slate-700 dark:text-slate-300" onclick="quickEdit('${item.id}', 'desc')">${item.desc}</div>
+                            <div class="excel-cell justify-end font-bold tabular-nums hover:text-indigo-600" onclick="quickEdit('${item.id}', 'amt')">${formatDisplay(item.amt)}</div>
+                            <div class="excel-cell justify-center">${!isBatchMode ? `<button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-red-400">✕</button>` : ''}</div>
+                        `;
+                        list.appendChild(row);
+                    });
+                }
             });
         }
 
-        function exportData() { const b = new Blob([JSON.stringify(expenses)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `Wallet_Buddy_Backup.json`; a.click(); }
-        function importData(e) { const r = new FileReader(); r.onload = (x) => { expenses = [...expenses, ...JSON.parse(x.target.result)]; localStorage.setItem('acc_data_v3', JSON.stringify(expenses)); render(); }; r.readAsText(e.target.files[0]); }
+        function quickEdit(id, field) {
+            if(isBatchMode) return;
+            const item = expenses.find(e => e.id.toString() === id.toString());
+            if(!item) return;
+            let curVal = item[field];
+            if(field === 'amt') curVal = (item.amt / (curMode==='USD'?rates.USD : (curMode==='KRW'?rates.KRW:1))).toFixed(2);
+            const newVal = prompt(`${i18nDict[currentLang].editPrompt} ${field}:`, curVal);
+            if(newVal !== null && newVal.trim() !== "") {
+                if(field === 'amt') {
+                    if(!isNaN(parseFloat(newVal))) item.amt = parseFloat(newVal) * (curMode==='USD'?rates.USD : (curMode==='KRW'?rates.KRW:1));
+                } else { item[field] = newVal.trim(); }
+                localStorage.setItem('acc_data_v3', JSON.stringify(expenses));
+                render();
+            }
+        }
 
-        document.getElementById('iptDate').valueAsDate = new Date();
-        applyTheme(); updateUI();
+        function formatDisplay(v) {
+            let conv = v / (curMode==='USD'?rates.USD : (curMode==='KRW'?rates.KRW:1));
+            return SYMBOLS[curMode] + conv.toLocaleString(undefined, { minimumFractionDigits: curMode==='KRW'?0:2, maximumFractionDigits: curMode==='KRW'?0:2 });
+        }
+        function rotateCurrency() { const seq=['CNY','USD','KRW']; curMode=seq[(seq.indexOf(curMode)+1)%3]; document.getElementById('currencyBtn').innerText=curMode; render(); }
+        function setLang(l) { currentLang = l; localStorage.setItem('acc_lang', l); updateUI(); }
+        function updateUI() {
+            document.querySelectorAll('.i18n').forEach(el => el.innerText = i18nDict[currentLang][el.getAttribute('data-key')]);
+            document.querySelectorAll('.i18n-ph').forEach(el => el.placeholder = i18nDict[currentLang][el.getAttribute('data-key')]);
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.className = `lang-btn px-3 py-1 text-[10px] font-medium rounded-md ${btn.id==='btn-'+currentLang?'bg-indigo-600 text-white shadow-sm':'text-slate-400 hover:text-slate-600'}`);
+            render();
+        }
+        function toggleDark() { isDark=!isDark; localStorage.setItem('acc_dark', isDark); document.body.classList.toggle('dark', isDark); document.getElementById('darkBtn').innerText=isDark?"☀️":"🌙"; }
+        function addRecord() {
+            const d=document.getElementById('iptDate').value, c=document.getElementById('iptCat').value.trim(), city=document.getElementById('iptCity').value.trim(), t=document.getElementById('iptDesc').value, a=parseFloat(document.getElementById('iptAmt').value);
+            if(!d || isNaN(a)) return;
+            let cny = (curMode==='USD') ? a*rates.USD : (curMode==='KRW' ? a*rates.KRW : a);
+            expenses.push({ id: Date.now()+Math.random(), date: d, cat: c||'Other', city, desc: t||'-', amt: cny });
+            localStorage.setItem('acc_data_v3', JSON.stringify(expenses));
+            document.getElementById('iptDesc').value = ''; document.getElementById('iptAmt').value = '';
+            render();
+        }
+        function deleteItem(id) { if(confirm('确认删除吗？')) { expenses=expenses.filter(e=>e.id.toString()!==id.toString()); localStorage.setItem('acc_data_v3', JSON.stringify(expenses)); render(); } }
+
+        function updateCharts(mG, rangeCats, showPie) {
+            // 柱状图
+            const bCtx=document.getElementById('barChart').getContext('2d'), bKeys=Object.keys(mG).sort();
+            const bData=bKeys.map(k=> (curMode==='USD'?mG[k]/rates.USD : (curMode==='KRW'?mG[k]/rates.KRW:mG[k])));
+            if(barChart) barChart.destroy();
+            barChart = new Chart(bCtx, { type:'bar', data:{labels:bKeys, datasets:[{data:bData, backgroundColor:'#4F46E5', borderRadius:4}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, datalabels: { display: false }}} });
+
+            // 饼图
+            const pStatus = document.getElementById('pieStatus');
+            const pContainer = document.getElementById('pieContainer');
+            
+            if(!showPie || Object.keys(rangeCats).length === 0) {
+                pStatus.classList.remove('hidden');
+                pContainer.classList.add('hidden');
+                return;
+            }
+            pStatus.classList.add('hidden');
+            pContainer.classList.remove('hidden');
+            const pCtx=document.getElementById('pieChart').getContext('2d'), pLabels=Object.keys(rangeCats), pData=Object.values(rangeCats);
+            const total = pData.reduce((a,b)=>a+b, 0);
+
+            if(pieChart) pieChart.destroy();
+            pieChart = new Chart(pCtx, { 
+                type: 'doughnut', 
+                data: {
+                    labels: pLabels, 
+                    datasets: [{
+                        data: pData, 
+                        backgroundColor: pLabels.map(l=>getCatColor(l)), 
+                        borderWidth: 0
+                    }]
+                }, 
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    layout: { padding: 25 },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { enabled: true },
+                        // 百分比标签配置
+                        datalabels: {
+                            display: true,
+                            color: '#fff',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (value) => {
+                                let percentage = (value / total * 100).toFixed(1) + "%";
+                                return percentage;
+                            },
+                            // 只有当比例大于 5% 时才显示标签，防止太挤
+                            display: (context) => {
+                                return context.dataset.data[context.dataIndex] / total > 0.05;
+                            }
+                        }
+                    }
+                } 
+            });
+        }
+
+        function updateDatalists(citySet, catsSet) {
+            const cDl=document.getElementById('cityHistory'), ctDl=document.getElementById('catHistory'), fCity=document.getElementById('filterCity'), oldCity=fCity.value;
+            cDl.innerHTML=''; ctDl.innerHTML=''; fCity.innerHTML=`<option value="">全部城市</option>`;
+            Array.from(citySet).sort().forEach(c => { cDl.innerHTML+=`<option value="${c}">`; fCity.innerHTML+=`<option value="${c}" ${c===oldCity?'selected':''}>${c}</option>`; });
+            catsSet.forEach(c => ctDl.innerHTML+=`<option value="${c}">`);
+        }
+        const getCatColor = (cat) => `hsl(${Math.abs(cat.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 360}, 60%, 65%)`;
+        function saveMemo() { localStorage.setItem('acc_memo', document.getElementById('memoArea').value); }
+        function toggleBatchMode() { isBatchMode = !isBatchMode; document.getElementById('batchBar').classList.toggle('active', isBatchMode); render(); }
+        function updateCount() { document.getElementById('selectedCount').innerText = document.querySelectorAll('.item-checkbox:checked').length; }
+        function toggleSelectAll() { document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = document.getElementById('selectAll').checked); updateCount(); }
+        function batchDelete() { const checked = Array.from(document.querySelectorAll('.item-checkbox:checked')).map(cb => cb.value); if(checked.length > 0 && confirm('确认删除吗？')) { expenses = expenses.filter(e => !checked.includes(e.id.toString())); localStorage.setItem('acc_data_v3', JSON.stringify(expenses)); toggleBatchMode(); } }
+        function exportData() { const b=new Blob([JSON.stringify(expenses)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`Wallet_Buddy.json`; a.click(); }
+        function importData(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => { try { expenses = [...expenses, ...JSON.parse(e.target.result)]; localStorage.setItem('acc_data_v3', JSON.stringify(expenses)); render(); } catch (err) { alert("Error"); } };
+            reader.readAsText(file);
+        }
+        function debounceSearch() { clearTimeout(searchTimeout); searchTimeout = setTimeout(render, 250); }
+        async function fetchRates() { try { const res = await fetch('https://open.er-api.com/v6/latest/CNY'); const data = await res.json(); if (data?.rates) { rates.USD = 1/data.rates.USD; rates.KRW = 1/data.rates.KRW; document.getElementById('rateInfo').innerText = `1 USD ≈ ${rates.USD.toFixed(2)} CNY`; } } catch (e) {} }
+
+        fetchRates(); document.getElementById('iptDate').valueAsDate = new Date(); 
+        document.getElementById('memoArea').value = localStorage.getItem('acc_memo') || ''; updateUI();
     </script>
 </body>
 </html>
