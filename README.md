@@ -47,7 +47,7 @@
 ## **Quick Start(exciting!!!!)**
 
 - **Access**  
-  - Open the deployed GitHub Pages URL  
+  - Open the deployed GitHub Pages URL: https://jessica7chen.github.io/my-smart-wallet/ 
   - Or download `index.html` and run locally  
 
 - **Log**  
